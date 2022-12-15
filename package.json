@@ -45,6 +45,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "bootstrap": "^5.2.3"
+    "bootstrap": "^5.2.3",
+    "vanilla-router": "^1.2.8"
   }
 }

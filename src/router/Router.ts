@@ -19,6 +19,9 @@ class Router implements IRouter {
         const init = this.init.bind(this, null);
 
         window.addEventListener('popstate', init);
+        document.addEventListener('readystatechange', (e) => {
+            console.log(e)
+        })
     }
 
     init() {
@@ -43,10 +46,14 @@ class Router implements IRouter {
 
         const pathname = utils.getPathName();
 
-        console.log(new URL(window.location.href));
-        console.log(pathname + address);
 
         if (pathname !== address) {
+            const lastChar = pathname[pathname.length - 1];
+
+            if (lastChar === '/') {
+                address = address.slice(1);
+            }
+
             globalThis.history.pushState(pathname + address, '', address);
         }
 
@@ -75,3 +82,4 @@ class Router implements IRouter {
 }
 
 export default Router;
+
