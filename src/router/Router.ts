@@ -19,43 +19,39 @@ class Router implements IRouter {
         const init = this.init.bind(this, null);
 
         window.addEventListener('popstate', init);
-    };
+    }
 
-    init(root: HTMLElement | null) {
+    init() {
         const currentRouter = this.getCurrentRouter();
 
         controller.init(currentRouter as IRouterItem);
 
         this.activateLinks();
-    };
+    }
 
     push(pushProps: IRouteURL | null, e: MouseEvent) {
         let address = '';
-        let data = {} as unknown;
-
-        console.log('push')
+        const data = {} as unknown;
 
         if (pushProps) {
-            const {url, data} = pushProps;
+            const {url} = pushProps;
             address = url;
         } else {
-            address = (e.target as HTMLElement).getAttribute('data-href') as string;
+            e.preventDefault();
+            address = (e.target as HTMLElement).getAttribute('href') as string;
         }
 
         const pathname = utils.getPathName();
 
         if (pathname !== address) {
             globalThis.history.pushState(data, '', address);
-            this.init(null);
-        } else {
-            window.location.reload();
         }
-    };
+
+        this.init();
+    }
 
     activateLinks() {
-        const links = document.querySelectorAll('[data-href]');
-
-        console.log(links)
+        const links = document.querySelectorAll('[href]');
 
         if (links.length) {
             const push = this.push.bind(this, null);
