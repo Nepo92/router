@@ -45,7 +45,7 @@ class Router implements IRouter {
 
         if (pathname !== address) {
             console.log(new URL(window.location.href));
-            globalThis.history.pushState(data, '', address);
+            // globalThis.history.pushState(data, '', address);
         }
 
         this.init();

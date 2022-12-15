@@ -11,7 +11,6 @@ class App implements IApp {
     }
 
     async start(root: HTMLElement) {
-        console.log(this.modules)
         this.modules.forEach((item) => item.init(root));
     }
 }
