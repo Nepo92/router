@@ -1,13 +1,17 @@
-import Controller from '../components/controller/controller';
+import { IContext } from '../app/types/IApp';
+import Controller from '../controller/Controller';
 import Utils from '../utils/Utils';
+import Listeners from '../utils/listeners/Listeners';
 import { IRouter, IRouterItem, IRouteURL } from './types/IRouter';
 
 const utils = new Utils();
 const controller = new Controller();
+const listeners = new Listeners();
 
 class Router implements IRouter {
     name = '$router';
     routers = [] as Array<IRouterItem>;
+    context = {} as IContext;
 
     constructor(routers: Array<IRouterItem>) {
         this.routers = [...routers];
@@ -15,33 +19,37 @@ class Router implements IRouter {
         this.init = this.init;
         this.activateLinks = this.activateLinks;
         this.getCurrentRouter = this.getCurrentRouter;
-
-        const init = this.init.bind(this, null);
-
-        window.addEventListener('popstate', init);
-        document.addEventListener('readystatechange', (e) => {
-            console.log(e)
-        })
     }
 
-    init() {
+    init(context: IContext) {
+        this.context = context;
+
         const currentRouter = this.getCurrentRouter();
 
-        controller.init(currentRouter as IRouterItem);
+        if (currentRouter) {
+            this.context.router = currentRouter;
 
-        this.activateLinks();
+            controller.init(this.context);
+    
+            this.activateLinks(this.context);
+
+            const initRoute = this.init.bind(this, this.context);
+            listeners.onceListener('popstate', initRoute);
+        }
     }
 
-    push(pushProps: IRouteURL | null, e: MouseEvent) {
-        let address = '';
-        const data = {} as unknown;
+    push(pushProps: IRouteURL, e: MouseEvent) {
+        if (e) {
+            e.preventDefault();
+        }
 
-        if (pushProps) {
-            const {url} = pushProps;
+        let address = '';
+        const { url, data } = pushProps;
+
+        if (url) {
             address = url;
         } else {
-            e.preventDefault();
-            address = (e.target as HTMLElement).getAttribute('data-href') as string;
+            address = (e.target as HTMLElement).getAttribute('href') as string;
         }
 
         const pathname = utils.getPathName();
@@ -57,14 +65,14 @@ class Router implements IRouter {
             globalThis.history.pushState(pathname + address, '', address);
         }
 
-        this.init();
+        this.init(data);
     }
 
-    activateLinks() {
-        const links = document.querySelectorAll('[data-href]');
+    activateLinks(context: IContext) {
+        const links = document.querySelectorAll('[href]');
 
         if (links.length) {
-            const push = this.push.bind(this, null);
+            const push = this.push.bind(this, {url: '', data: context});
 
             links.forEach((item) => {
                 const clone = utils.replaceItem(item as HTMLElement);
@@ -77,7 +85,9 @@ class Router implements IRouter {
     getCurrentRouter() {
         const pathname = utils.getPathName();
 
-        return this.routers.find((el) => el.path === pathname);
+        const route = this.routers.find((el) => el.path === pathname);
+
+        return route || this.routers.find((el) => el.path === 404);
     }
 }
 

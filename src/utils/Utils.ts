@@ -1,4 +1,6 @@
 class Utils {
+    listeners = [] as Array<string>;
+
     replaceItem(item: HTMLElement) {
         const clone = item.cloneNode(true);
 
