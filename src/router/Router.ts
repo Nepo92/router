@@ -38,7 +38,7 @@ class Router implements IRouter {
             address = url;
         } else {
             e.preventDefault();
-            address = (e.target as HTMLElement).getAttribute('href') as string;
+            address = (e.target as HTMLElement).getAttribute('data-href') as string;
         }
 
         const pathname = utils.getPathName();
@@ -52,7 +52,7 @@ class Router implements IRouter {
     }
 
     activateLinks() {
-        const links = document.querySelectorAll('[href]');
+        const links = document.querySelectorAll('[data-href]');
 
         if (links.length) {
             const push = this.push.bind(this, null);
